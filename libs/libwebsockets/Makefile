@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libwebsockets
-PKG_VERSION:=4.3.2
-PKG_RELEASE:=2
+PKG_VERSION:=4.3.3
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_URL:=https://codeload.github.com/warmcat/libwebsockets/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=6a85a1bccf25acc7e8e5383e4934c9b32a102880d1e4c37c70b27ae2a42406e1
+PKG_HASH:=6fd33527b410a37ebc91bb64ca51bdabab12b076bc99d153d7c5dd405e4bdf90
 
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
 
@@ -33,6 +33,7 @@ CMAKE_OPTIONS += -DISABLE_WERROR=ON
 CMAKE_OPTIONS += -DCMAKE_BUILD_TYPE=Release
 CMAKE_OPTIONS += -DLWS_WITH_EXTERNAL_POLL=ON
 CMAKE_OPTIONS += -DLWS_WITH_ULOOP=ON
+CMAKE_OPTIONS += -DLWS_WITH_LIBUV=ON
 
 # turn off all test apps
 CMAKE_OPTIONS += -DLWS_WITHOUT_TESTAPPS=ON
@@ -45,7 +46,8 @@ define Package/libwebsockets/Default
 	SECTION:=libs
 	CATEGORY:=Libraries
 	TITLE:=libwebsockets
-	DEPENDS:=+zlib +libcap +libubox
+	DEPENDS:=+zlib +libcap +libubox +libuv
+	PROVIDES:=libwebsockets
 	URL:=https://libwebsockets.org
 	MAINTAINER:=Karl Palsson <karlp@etactica.com>
 endef
@@ -55,7 +57,6 @@ define Package/libwebsockets-openssl
 	TITLE += (OpenSSL)
 	DEPENDS += +libopenssl
 	VARIANT:=openssl
-	CONFLICTS:=libwebsockets-full
 endef
 
 define Package/libwebsockets-mbedtls
@@ -63,16 +64,13 @@ define Package/libwebsockets-mbedtls
 	TITLE += (mbedTLS)
 	DEPENDS += +libmbedtls
 	VARIANT:=mbedtls
-	PROVIDES:=libwebsockets
-	CONFLICTS:=libwebsockets-openssl
 endef
 
 define Package/libwebsockets-full
 	$(call Package/libwebsockets/Default)
-	TITLE += (Full - OpenSSL, libuv, plugins, CGI)
-	DEPENDS += +libopenssl +libuv
+	TITLE += (Full - OpenSSL, plugins, CGI)
+	DEPENDS += +libopenssl
 	VARIANT:=full
-	PROVIDES:=libwebsockets libwebsockets-openssl
 endef
 
 ifeq ($(BUILD_VARIANT),openssl)
@@ -87,7 +85,6 @@ endif
 ifeq ($(BUILD_VARIANT),full)
     CMAKE_OPTIONS += -DLWS_OPENSSL_CLIENT_CERTS=/etc/ssl/certs
     CMAKE_OPTIONS += -DLWS_WITH_SSL=ON
-    CMAKE_OPTIONS += -DLWS_WITH_LIBUV=ON
     CMAKE_OPTIONS += -DLWS_WITH_PLUGINS=ON
     CMAKE_OPTIONS += -DLWS_WITH_SERVER_STATUS=ON
     CMAKE_OPTIONS += -DLWS_WITH_ACCESS_LOG=ON
