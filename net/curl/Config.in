@@ -111,7 +111,12 @@ config LIBCURL_NGHTTP3
 	default n
 
 config LIBCURL_NGTCP2
-	bool "QUIC protocol"
+	bool "QUIC protocol - ngtcp2"
+	depends on LIBCURL_OPENSSL
+	default n
+
+config LIBCURL_OPENSSL_QUIC
+	bool "QUIC protocol - openssl 3.2+"
 	depends on LIBCURL_OPENSSL
 	default n
 
